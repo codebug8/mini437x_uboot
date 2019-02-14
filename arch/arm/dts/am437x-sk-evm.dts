@@ -1,0 +1,336 @@
+/*
+ * Copyright (C) 2014 Texas Instruments Incorporated - http://www.ti.com/
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+/* AM437x SK EVM */
+
+/dts-v1/;
+
+#include "am4372.dtsi"
+#include <dt-bindings/pinctrl/am43xx.h>
+#include <dt-bindings/pwm/pwm.h>
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
+
+/ {
+	model = "TI AM437x SK EVM";
+	compatible = "ti,am437x-sk-evm","ti,am4372","ti,am43";
+
+	aliases {
+		display0 = &lcd0;
+	};
+
+	chosen {
+		stdout-path = &uart0;
+		tick-timer = &timer2;
+	};
+
+	backlight {
+		compatible = "pwm-backlight";
+		pwms = <&ecap0 0 50000 PWM_POLARITY_INVERTED>;
+		brightness-levels = <0 51 53 56 62 75 101 152 255>;
+		default-brightness-level = <8>;
+	};
+
+
+	lcd0: display {
+		compatible = "newhaven,nhd-4.3-480272ef-atxl", "panel-dpi";
+		label = "lcd";
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&lcd_pins>;
+
+		enable-gpios = <&gpio1 7 GPIO_ACTIVE_HIGH>;
+
+		panel-timing {
+			clock-frequency = <9000000>;
+			hactive = <480>;
+			vactive = <272>;
+			hfront-porch = <2>;
+			hback-porch = <2>;
+			hsync-len = <41>;
+			vfront-porch = <2>;
+			vback-porch = <2>;
+			vsync-len = <10>;
+			hsync-active = <0>;
+			vsync-active = <0>;
+			de-active = <1>;
+			pixelclk-active = <1>;
+		};
+
+		port {
+			lcd_in: endpoint {
+				remote-endpoint = <&dpi_out>;
+			};
+		};
+	};
+};
+
+&am43xx_pinmux {
+
+	i2c0_pins: i2c0_pins {
+		pinctrl-single,pins = <
+			0x188 (PIN_INPUT | SLEWCTRL_FAST | MUX_MODE0)  /* i2c0_sda.i2c0_sda */
+			0x18c (PIN_INPUT | SLEWCTRL_FAST | MUX_MODE0)  /* i2c0_scl.i2c0_scl */
+		>;
+	};
+
+	i2c1_pins: i2c1_pins {
+		pinctrl-single,pins = <
+			0x15c (PIN_INPUT | SLEWCTRL_FAST | MUX_MODE2)  /* spi0_cs0.i2c1_scl */
+			0x158 (PIN_INPUT | SLEWCTRL_FAST | MUX_MODE2)  /* spi0_d1.i2c1_sda  */
+		>;
+	};
+
+	mmc1_pins: pinmux_mmc1_pins {
+		pinctrl-single,pins = <
+			0x0f0 (PIN_INPUT | MUX_MODE0) /* mmc0_dat3.mmc0_dat3 */
+			0x0f4 (PIN_INPUT | MUX_MODE0) /* mmc0_dat2.mmc0_dat2 */
+			0x0f8 (PIN_INPUT | MUX_MODE0) /* mmc0_dat1.mmc0_dat1 */
+			0x0fc (PIN_INPUT | MUX_MODE0) /* mmc0_dat0.mmc0_dat0 */
+			0x100 (PIN_INPUT | MUX_MODE0) /* mmc0_clk.mmc0_clk */
+			0x104 (PIN_INPUT | MUX_MODE0) /* mmc0_cmd.mmc0_cmd */
+			0x160 (PIN_INPUT | MUX_MODE7) /* spi0_cs1.gpio0_6 */
+		>;
+	};
+
+	ecap0_pins: backlight_pins {
+		pinctrl-single,pins = <
+			0x164 (PIN_OUTPUT | MUX_MODE0) /* eCAP0_in_PWM0_out.eCAP0_in_PWM0_out */
+		>;
+	};
+
+
+	dss_pins: dss_pins {
+		pinctrl-single,pins = <
+			0x020 (PIN_OUTPUT | MUX_MODE1)	/* gpmc ad 8 -> DSS DATA 23 */
+			0x024 (PIN_OUTPUT | MUX_MODE1)
+			0x028 (PIN_OUTPUT | MUX_MODE1)
+			0x02c (PIN_OUTPUT | MUX_MODE1)
+			0x030 (PIN_OUTPUT | MUX_MODE1)
+			0x034 (PIN_OUTPUT | MUX_MODE1)
+			0x038 (PIN_OUTPUT | MUX_MODE1)
+			0x03c (PIN_OUTPUT | MUX_MODE1)	/* gpmc ad 15 -> DSS DATA 16 */
+			0x0a0 (PIN_OUTPUT | MUX_MODE0)	/* DSS DATA 0 */
+			0x0a4 (PIN_OUTPUT | MUX_MODE0)
+			0x0a8 (PIN_OUTPUT | MUX_MODE0)
+			0x0ac (PIN_OUTPUT | MUX_MODE0)
+			0x0b0 (PIN_OUTPUT | MUX_MODE0)
+			0x0b4 (PIN_OUTPUT | MUX_MODE0)
+			0x0b8 (PIN_OUTPUT | MUX_MODE0)
+			0x0bc (PIN_OUTPUT | MUX_MODE0)
+			0x0c0 (PIN_OUTPUT | MUX_MODE0)
+			0x0c4 (PIN_OUTPUT | MUX_MODE0)
+			0x0c8 (PIN_OUTPUT | MUX_MODE0)
+			0x0cc (PIN_OUTPUT | MUX_MODE0)
+			0x0d0 (PIN_OUTPUT | MUX_MODE0)
+			0x0d4 (PIN_OUTPUT | MUX_MODE0)
+			0x0d8 (PIN_OUTPUT | MUX_MODE0)
+			0x0dc (PIN_OUTPUT | MUX_MODE0)	/* DSS DATA 15 */
+			0x0e0 (PIN_OUTPUT | MUX_MODE0)	/* DSS VSYNC */
+			0x0e4 (PIN_OUTPUT | MUX_MODE0)	/* DSS HSYNC */
+			0x0e8 (PIN_OUTPUT | MUX_MODE0)	/* DSS PCLK */
+			0x0ec (PIN_OUTPUT | MUX_MODE0)	/* DSS AC BIAS EN */
+
+		>;
+	};
+
+
+	lcd_pins: lcd_pins {
+		pinctrl-single,pins = <
+			0x1c (PIN_OUTPUT_PULLDOWN | MUX_MODE7) /* gpcm_ad7.gpio1_7 */
+		>;
+	};
+
+	usb1_pins: usb1_pins {
+		pinctrl-single,pins = <
+			0x2c0 (PIN_OUTPUT | MUX_MODE0) /* usb0_drvvbus.usb0_drvvbus */
+		>;
+	};
+
+	usb2_pins: usb2_pins {
+		pinctrl-single,pins = <
+			0x2c4 (PIN_OUTPUT | MUX_MODE0) /* usb0_drvvbus.usb0_drvvbus */
+		>;
+	};
+};
+
+&i2c0 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c0_pins>;
+	clock-frequency = <400000>;
+
+	tps@24 {
+		compatible = "ti,tps65218";
+		reg = <0x24>;
+		interrupts = <GIC_SPI 7 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-controller;
+		#interrupt-cells = <2>;
+
+		dcdc1: regulator-dcdc1 {
+			compatible = "ti,tps65218-dcdc1";
+			/* VDD_CORE limits min of OPP50 and max of OPP100 */
+			regulator-name = "vdd_core";
+			regulator-min-microvolt = <912000>;
+			regulator-max-microvolt = <1144000>;
+			regulator-boot-on;
+			regulator-always-on;
+		};
+
+		dcdc2: regulator-dcdc2 {
+			compatible = "ti,tps65218-dcdc2";
+			/* VDD_MPU limits min of OPP50 and max of OPP_NITRO */
+			regulator-name = "vdd_mpu";
+			regulator-min-microvolt = <912000>;
+			regulator-max-microvolt = <1378000>;
+			regulator-boot-on;
+			regulator-always-on;
+		};
+
+		dcdc3: regulator-dcdc3 {
+			compatible = "ti,tps65218-dcdc3";
+			regulator-name = "vdds_ddr";
+			regulator-min-microvolt = <1500000>;
+			regulator-max-microvolt = <1500000>;
+			regulator-boot-on;
+			regulator-always-on;
+		};
+
+		dcdc4: regulator-dcdc4 {
+			compatible = "ti,tps65218-dcdc4";
+			regulator-name = "v3_3d";
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
+			regulator-boot-on;
+			regulator-always-on;
+		};
+
+		ldo1: regulator-ldo1 {
+			compatible = "ti,tps65218-ldo1";
+			regulator-name = "v1_8d";
+			regulator-min-microvolt = <1800000>;
+			regulator-max-microvolt = <1800000>;
+			regulator-boot-on;
+			regulator-always-on;
+		};
+
+		power-button {
+			compatible = "ti,tps65218-pwrbutton";
+			status = "okay";
+			interrupts = <3 IRQ_TYPE_EDGE_BOTH>;
+		};
+	};
+
+};
+
+&i2c1 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c1_pins>;
+	clock-frequency = <400000>;
+};
+
+&epwmss0 {
+	status = "okay";
+};
+
+&ecap0 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&ecap0_pins>;
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&gpio1 {
+	status = "okay";
+};
+
+&gpio5 {
+	status = "okay";
+};
+
+&mmc1 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&mmc1_pins>;
+
+	vmmc-supply = <&dcdc4>;
+	bus-width = <4>;
+	cd-gpios = <&gpio0 6 GPIO_ACTIVE_LOW>;
+};
+#if 1
+&mmc2 {
+        /*
+         * When enabling eMMC, disable GPMC/NAND and set
+         * SelEMMCorNAND to output-high
+         */
+        status = "okay";
+        vmmc-supply = <&dcdc4>;
+        bus-width = <8>;
+        pinctrl-names = "default", "sleep";
+//      pinctrl-0 = <&emmc_pins_default>;
+//      pinctrl-1 = <&emmc_pins_sleep>;
+        ti,non-removable;
+};
+#endif
+&usb2_phy1 {
+	status = "okay";
+};
+
+&usb1 {
+	dr_mode = "peripheral";
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&usb1_pins>;
+};
+
+&usb2_phy2 {
+	status = "okay";
+};
+
+&usb2 {
+	dr_mode = "host";
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&usb2_pins>;
+};
+
+&elm {
+	status = "okay";
+};
+
+
+&dss {
+	status = "okay";
+
+	pinctrl-names = "default";
+	pinctrl-0 = <&dss_pins>;
+
+	port {
+		dpi_out: endpoint@0 {
+			remote-endpoint = <&lcd_in>;
+			data-lines = <24>;
+		};
+	};
+};
+
+&rtc {
+	status = "okay";
+};
+
+&wdt {
+	status = "okay";
+};
+
+&cpu {
+	cpu0-supply = <&dcdc2>;
+};
+

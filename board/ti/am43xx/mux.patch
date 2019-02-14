@@ -1,0 +1,113 @@
+--- mux.c.bak	2019-01-16 10:49:53.443163317 +0800
++++ mux.c	2019-01-16 10:56:42.586000662 +0800
+@@ -1,30 +1,20 @@
+ /*
+- * mux.c
++ * mux configuration code for MYIR Tech ricoboard
+  *
+- * Copyright (C) 2013 Texas Instruments Incorporated - http://www.ti.com/
++ * Copyright (C) 2016, MYIR Tech Ltd - http://www.myirtech.com/
++ *
++ * Author: Sunny Guo <sunny.guo@myirtech.com>
+  *
+  * SPDX-License-Identifier:	GPL-2.0+
+  */
+ 
++
+ #include <common.h>
+ #include <asm/arch/sys_proto.h>
+ #include <asm/arch/mux.h>
+ #include "../common/board_detect.h"
+ #include "board.h"
+ 
+-static struct module_pin_mux rmii1_pin_mux[] = {
+-	{OFFSET(mii1_txen), MODE(1)},			/* RMII1_TXEN */
+-	{OFFSET(mii1_txd1), MODE(1)},			/* RMII1_TD1 */
+-	{OFFSET(mii1_txd0), MODE(1)},			/* RMII1_TD0 */
+-	{OFFSET(mii1_rxd1), MODE(1) | RXACTIVE},	/* RMII1_RD1 */
+-	{OFFSET(mii1_rxd0), MODE(1) | RXACTIVE},	/* RMII1_RD0 */
+-	{OFFSET(mii1_rxdv), MODE(1) | RXACTIVE},	/* RMII1_RXDV */
+-	{OFFSET(mii1_crs), MODE(1) | RXACTIVE},		/* RMII1_CRS_DV */
+-	{OFFSET(mii1_rxerr), MODE(1) | RXACTIVE},	/* RMII1_RXERR */
+-	{OFFSET(rmii1_refclk), MODE(0) | RXACTIVE},	/* RMII1_refclk */
+-	{-1},
+-};
+-
+ static struct module_pin_mux rgmii1_pin_mux[] = {
+ 	{OFFSET(mii1_txen), MODE(2)},			/* RGMII1_TCTL */
+ 	{OFFSET(mii1_rxdv), MODE(2) | RXACTIVE},	/* RGMII1_RCTL */
+@@ -69,10 +59,6 @@
+ 	{-1},
+ };
+ 
+-static struct module_pin_mux gpio5_7_pin_mux[] = {
+-	{OFFSET(spi0_cs0), (MODE(7) | PULLUP_EN)},	/* GPIO5_7 */
+-	{-1},
+-};
+ 
+ #ifdef CONFIG_NAND
+ static struct module_pin_mux nand_pin_mux[] = {
+@@ -115,40 +101,40 @@
+ 	{-1},
+ };
+ 
++static struct module_pin_mux emmc_pin_mux[] = {
++	{OFFSET(gpmc_csn1), (MODE(2) | PULLUDDIS | RXACTIVE)}, /* EMMC_CLK */
++	{OFFSET(gpmc_csn2), (MODE(2) | PULLUP_EN | RXACTIVE)}, /* EMMC_CMD */
++	{OFFSET(gpmc_ad0),  (MODE(1) | PULLUP_EN | RXACTIVE)}, /* EMMC_DAT0 */
++	{OFFSET(gpmc_ad1),  (MODE(1) | PULLUP_EN | RXACTIVE)}, /* EMMC_DAT1 */
++	{OFFSET(gpmc_ad2), (MODE(1) | PULLUP_EN | RXACTIVE)}, /* EMMC_DAT2 */
++	{OFFSET(gpmc_ad3), (MODE(1) | PULLUP_EN | RXACTIVE)}, /* EMMC_DAT3 */
++	{OFFSET(gpmc_ad4), (MODE(1) | PULLUP_EN | RXACTIVE)}, /* EMMC_DAT4 */
++	{OFFSET(gpmc_ad5), (MODE(1) | PULLUP_EN | RXACTIVE)}, /* EMMC_DAT5 */
++	{OFFSET(gpmc_ad6), (MODE(1) | PULLUP_EN | RXACTIVE)}, /* EMMC_DAT6 */
++	{OFFSET(gpmc_ad7), (MODE(1) | PULLUP_EN | RXACTIVE)}, /* EMMC_DAT7 */
++	{-1},
++};
++void enable_i2c0_pin_mux(void)
++{
++	configure_module_pin_mux(i2c0_pin_mux);
++}
+ void enable_uart0_pin_mux(void)
+ {
+ 	configure_module_pin_mux(uart0_pin_mux);
+ }
+-
+ void enable_board_pin_mux(void)
+ {
+ 	configure_module_pin_mux(mmc0_pin_mux);
+ 	configure_module_pin_mux(i2c0_pin_mux);
+ 	configure_module_pin_mux(mdio_pin_mux);
+-
+-	if (board_is_gpevm()) {
+-		configure_module_pin_mux(gpio5_7_pin_mux);
+-		configure_module_pin_mux(rgmii1_pin_mux);
+-#if defined(CONFIG_NAND)
+-		configure_module_pin_mux(nand_pin_mux);
+-#endif
+-	} else if (board_is_sk() || board_is_idk()) {
+-		configure_module_pin_mux(rgmii1_pin_mux);
+-#if defined(CONFIG_NAND)
+-		printf("Error: NAND flash not present on this board\n");
+-#endif
+-		configure_module_pin_mux(qspi_pin_mux);
+-	} else if (board_is_eposevm()) {
+-		configure_module_pin_mux(rmii1_pin_mux);
++	
++	configure_module_pin_mux(rgmii1_pin_mux);
+ #if defined(CONFIG_NAND)
+-		configure_module_pin_mux(nand_pin_mux);
++	configure_module_pin_mux(nand_pin_mux);
+ #else
+-		configure_module_pin_mux(qspi_pin_mux);
++	configure_module_pin_mux(qspi_pin_mux);
++	configure_module_pin_mux(emmc_pin_mux);
+ #endif
+ 	}
+-}
+ 
+-void enable_i2c0_pin_mux(void)
+-{
+-	configure_module_pin_mux(i2c0_pin_mux);
+-}
++
